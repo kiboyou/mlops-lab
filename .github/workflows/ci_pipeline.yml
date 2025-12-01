@@ -1,0 +1,41 @@
+name: MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate_and_train:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.7'
+
+      - name: Install dependencies
+        run: pip install pandas scikit-learn evidently joblib
+
+      - name: Prepare data
+        run: python data_prep.py
+
+      - name: Run Data Validation (Ex 2.2)
+        # Échoue si validate_data.py retourne 1
+        run: python validate_data.py
+
+      - name: Train Model
+        run: python train_model.py
+
+      - name: Run Model Validation (Ex 2.3)
+        run: python validate_model.py
+
+      - name: Upload Model Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: artifacts/
